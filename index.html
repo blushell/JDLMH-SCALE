@@ -35,6 +35,9 @@
 				padding: 1rem;
 				border-radius: 0.5rem;
 			}
+			canvas {
+				margin-top: 2rem;
+			}
 		</style>
 	</head>
 	<body>
@@ -42,7 +45,7 @@
 			<h2>Door Hanger Campaign Calculator</h2>
 
 			<label>Total Houses in Area</label>
-			<input type="number" id="totalHouses" value="23000" />
+			<input type="number" id="totalHouses" value="173000" />
 
 			<label>Companies per Hanger</label>
 			<input type="number" id="companiesPerHanger" value="3" />
@@ -54,13 +57,13 @@
 			<input type="number" id="cooldownWeeks" value="4" />
 
 			<label>Total Print/Delivery Cost per Campaign</label>
-			<input type="number" id="printCost" value="1000" />
+			<input type="number" id="printCost" value="0" />
 
 			<label>Base Fee Paid by Each Company</label>
-			<input type="number" id="baseFee" value="500" />
+			<input type="number" id="baseFee" value="5000" />
 
 			<label>Conversion Rate (% of houses that become leads)</label>
-			<input type="number" id="conversionRate" value="2" />
+			<input type="number" id="conversionRate" value="4.4" />
 
 			<label>Lead Type</label>
 			<select id="leadType" onchange="toggleLeadInputs()">
@@ -70,16 +73,16 @@
 
 			<div id="fixedRateFields">
 				<label>Fixed Amount Paid Per Lead</label>
-				<input type="number" id="fixedRate" value="100" />
+				<input type="number" id="fixedRate" value="25" />
 			</div>
 
 			<div id="commissionFields" style="display: none">
 				<label>Value of Service Sold</label>
-				<input type="number" id="saleValue" value="1000" />
+				<input type="number" id="saleValue" value="0" />
 				<label>Commission Rate (%)</label>
-				<input type="number" id="commissionRate" value="10" />
+				<input type="number" id="commissionRate" value="0" />
 				<label>Conversion Rate from Lead to Sale (%)</label>
-				<input type="number" id="leadToSaleRate" value="50" />
+				<input type="number" id="leadToSaleRate" value="0" />
 			</div>
 
 			<button onclick="calculate()">Calculate</button>
@@ -110,6 +113,7 @@
 				const leadsPerCompany = (housesPerCampaign / B) * conversionRate;
 
 				let revenuePerCompany;
+				let actualSales = 0;
 				if (leadType === 'fixed') {
 					const fixedRate = +document.getElementById('fixedRate').value;
 					revenuePerCompany = baseFee + leadsPerCompany * fixedRate;
@@ -119,7 +123,7 @@
 						+document.getElementById('commissionRate').value / 100;
 					const leadToSaleRate =
 						+document.getElementById('leadToSaleRate').value / 100;
-					const actualSales = leadsPerCompany * leadToSaleRate;
+					actualSales = leadsPerCompany * leadToSaleRate;
 					revenuePerCompany =
 						baseFee + actualSales * saleValue * commissionRate;
 				}
@@ -133,6 +137,13 @@
     <p><strong>Estimated Leads per Company:</strong> ${leadsPerCompany.toFixed(
 			1
 		)}</p>
+    ${
+			leadType === 'commission'
+				? `<p><strong>Estimated Sales per Company:</strong> ${actualSales.toFixed(
+						1
+				  )}</p>`
+				: ''
+		}
     <p><strong>Revenue per Company:</strong> $${revenuePerCompany.toFixed(
 			2
 		)}</p>
