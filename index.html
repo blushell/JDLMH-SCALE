@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Door Hanger Campaign Calculator</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				padding: 2rem;
+				background: #f9f9f9;
+			}
+			.container {
+				max-width: 800px;
+				margin: auto;
+				background: white;
+				padding: 2rem;
+				border-radius: 1rem;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+			input,
+			select {
+				width: 100%;
+				padding: 0.5rem;
+				margin: 0.5rem 0;
+			}
+			label {
+				font-weight: bold;
+				margin-top: 1rem;
+				display: block;
+			}
+			.results {
+				margin-top: 2rem;
+				background: #eef;
+				padding: 1rem;
+				border-radius: 0.5rem;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h2>Door Hanger Campaign Calculator</h2>
+
+			<label>Total Houses in Area</label>
+			<input type="number" id="totalHouses" value="23000" />
+
+			<label>Companies per Hanger</label>
+			<input type="number" id="companiesPerHanger" value="3" />
+
+			<label>How many hangers a house can receive in X weeks</label>
+			<input type="number" id="maxHangersPerHouse" value="1" />
+
+			<label>Weeks before a house can receive another hanger</label>
+			<input type="number" id="cooldownWeeks" value="4" />
+
+			<label>Total Print/Delivery Cost per Campaign</label>
+			<input type="number" id="printCost" value="1000" />
+
+			<label>Base Fee Paid by Each Company</label>
+			<input type="number" id="baseFee" value="500" />
+
+			<label>Conversion Rate (% of houses that become leads)</label>
+			<input type="number" id="conversionRate" value="2" />
+
+			<label>Lead Type</label>
+			<select id="leadType" onchange="toggleLeadInputs()">
+				<option value="fixed">Fixed Rate</option>
+				<option value="commission">Commission</option>
+			</select>
+
+			<div id="fixedRateFields">
+				<label>Fixed Amount Paid Per Lead</label>
+				<input type="number" id="fixedRate" value="100" />
+			</div>
+
+			<div id="commissionFields" style="display: none">
+				<label>Value of Service Sold</label>
+				<input type="number" id="saleValue" value="1000" />
+				<label>Commission Rate (%)</label>
+				<input type="number" id="commissionRate" value="10" />
+				<label>Conversion Rate from Lead to Sale (%)</label>
+				<input type="number" id="leadToSaleRate" value="50" />
+			</div>
+
+			<button onclick="calculate()">Calculate</button>
+
+			<div class="results" id="results"></div>
+		</div>
+
+		<script>
+			function toggleLeadInputs() {
+				const type = document.getElementById('leadType').value;
+				document.getElementById('fixedRateFields').style.display =
+					type === 'fixed' ? 'block' : 'none';
+				document.getElementById('commissionFields').style.display =
+					type === 'commission' ? 'block' : 'none';
+			}
+
+			function calculate() {
+				const H = +document.getElementById('totalHouses').value;
+				const B = +document.getElementById('companiesPerHanger').value;
+				const cooldown = +document.getElementById('cooldownWeeks').value;
+				const printCost = +document.getElementById('printCost').value;
+				const baseFee = +document.getElementById('baseFee').value;
+				const conversionRate =
+					+document.getElementById('conversionRate').value / 100;
+				const leadType = document.getElementById('leadType').value;
+
+				const housesPerCampaign = Math.floor(H / cooldown);
+				const leadsPerCompany = (housesPerCampaign / B) * conversionRate;
+
+				let revenuePerCompany;
+				if (leadType === 'fixed') {
+					const fixedRate = +document.getElementById('fixedRate').value;
+					revenuePerCompany = baseFee + leadsPerCompany * fixedRate;
+				} else {
+					const saleValue = +document.getElementById('saleValue').value;
+					const commissionRate =
+						+document.getElementById('commissionRate').value / 100;
+					const leadToSaleRate =
+						+document.getElementById('leadToSaleRate').value / 100;
+					const actualSales = leadsPerCompany * leadToSaleRate;
+					revenuePerCompany =
+						baseFee + actualSales * saleValue * commissionRate;
+				}
+
+				const totalRevenue = revenuePerCompany * B;
+				const profit = totalRevenue - printCost;
+
+				const results = `
+    <h3>Results</h3>
+    <p><strong>Houses per Campaign:</strong> ${housesPerCampaign.toLocaleString()}</p>
+    <p><strong>Estimated Leads per Company:</strong> ${leadsPerCompany.toFixed(
+			1
+		)}</p>
+    <p><strong>Revenue per Company:</strong> $${revenuePerCompany.toFixed(
+			2
+		)}</p>
+    <p><strong>Total Revenue:</strong> $${totalRevenue.toFixed(2)}</p>
+    <p><strong>Profit:</strong> $${profit.toFixed(2)}</p>
+    <p><strong>Max Campaigns per Month:</strong> 4</p>
+    <p><strong>Total Companies Served per Month:</strong> ${4 * B}</p>
+  `;
+				document.getElementById('results').innerHTML = results;
+			}
+		</script>
+	</body>
+</html>
